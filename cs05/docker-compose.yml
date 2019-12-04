@@ -1,0 +1,11 @@
+version: '3'
+services: 
+  app:
+    build: ./app
+    ports: 
+      - 8443:8443
+      - 8080:8080
+    volumes:
+      - ./app:/works/app
+    command: /works/code-server --allow-http --auth none --port 8443 /works/app
+

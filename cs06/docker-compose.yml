@@ -1,0 +1,24 @@
+version: '3'
+services: 
+  app:
+    build: ./app
+    ports: 
+      - 8443:8443
+      - 8080:8080
+    volumes:
+      - ./app:/works/app
+    links:
+      - mysqld
+    command: /works/code-server --allow-http --auth none --port 8443 /works/app
+  mysqld:
+    image: mysql:5.7
+    ports: 
+      - "3306:3306"
+    environment: 
+      MYSQL_ROOT_PASSWORD: passwd
+      MYSQL_DATABASE: hello
+      #MYSQL_USER: user
+      #MYSQL_PASSWORD: password
+
+
+

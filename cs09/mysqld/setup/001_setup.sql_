@@ -1,0 +1,14 @@
+CREATE DATABASE IF NOT EXISTS app_db;
+USE app_db;
+
+CREATE TABLE users (
+    id int NOT NULL AUTO_INCREMENT,
+    name varchar(255),
+    email varchar(512),
+    PRIMARY KEY (id));
+
+INSERT INTO users (
+    name, email
+) VALUES (
+    'one', 'kyorohiro+one@example.com'
+);

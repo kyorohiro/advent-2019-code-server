@@ -2,16 +2,16 @@ import boto3
 from boto3_type_annotations import ec2
 from botocore.exceptions import ClientError
 
-security_group = "advent-code-server-security-group"
-ec2_instance_key_name= "advent-code-server"
+instance_name= "advent-code-server"
 ec2client:ec2.Client = boto3.client("ec2")
+
 
 def get_inst():
 
     try:
         print(">>>> ec2client.describe_instances")
         res = ec2client.describe_instances(
-            Filters=[{"Name":"tag:Name","Values":[ec2_instance_key_name]}]
+            Filters=[{"Name":"tag:Name","Values":[instance_name]}]
             )
         print("{}".format(res))
 

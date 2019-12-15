@@ -61,7 +61,15 @@ class Network:
         self._vpc_id = res['Vpc']['VpcId']
         res = self._ec2client.create_tags(Resources=[self._vpc_id], Tags=[{"Key": "Name", "Value": self._name}])
         print("{}".format(res))
-    
+
+    def delete_vpc(self):
+        print(">>> Delete vpcs")
+        res = self._ec2client.describe_vpcs(Filters=[{"Name":"tag:Name","Values":[self._name]}])
+        print("{}".format(res))
+        for vpc in res["Vpcs"]:
+            res = self._ec2client.delete_vpc(VpcId=vpc['VpcId'])
+            print("{}".format(res))
+
     def create_gateway(self):
         print(">>> CREATE GATEWAY")
         res = self._ec2client.create_internet_gateway()
@@ -73,6 +81,24 @@ class Network:
         res = self._ec2client.attach_internet_gateway(InternetGatewayId=self._gateway_id,VpcId=self._vpc_id)
         print("{}".format(res))
 
+    def delete_gateway(self):
+        print(">> Detach Gateway")
+        res = self._ec2client.describe_vpcs(Filters=[{"Name":"tag:Name","Values":[self._name]}])
+        print("{}".format(res))
+        for vpc in res["Vpcs"]:
+            res = self._ec2client.describe_internet_gateways(Filters=[{"Name":"tag:Name","Values":[self._name]}])
+            print("{}".format(res))
+            for gateway in res['InternetGateways']:
+                res = self._ec2client.detach_internet_gateway(InternetGatewayId=gateway['InternetGatewayId'],VpcId=vpc['VpcId'])
+                print("{}".format(res))
+
+        print(">> Delete Gateway")
+        res = self._ec2client.describe_internet_gateways(Filters=[{"Name":"tag:Name","Values":[self._name]}])
+        print("{}".format(res))
+        for gateway in res['InternetGateways']:
+            res = self._ec2client.delete_internet_gateway(InternetGatewayId=gateway['InternetGatewayId'])
+            print("{}".format(res))
+
     def create_route_table(self):
         print(">>> CREATE ROUTE TABLE")
         res = self._ec2client.create_route_table(VpcId=self._vpc_id)
@@ -81,12 +107,29 @@ class Network:
         res = self._ec2client.create_tags(Resources=[self._route_table_id], Tags=[{"Key": "Name", "Value": self._name}])
         print("{}".format(res))
 
+    def delete_route_table(self):
+        print(">> Delete route_table")
+        res = self._ec2client.describe_route_tables(Filters=[{"Name":"tag:Name","Values":[self._name]}])
+        print("{}".format(res))
+        for route_table in res['RouteTables']:
+            res = self._ec2client.delete_route_table(RouteTableId=route_table['RouteTableId'])
+            print("{}".format(res))
+
     def create_subnet(self):
         print(">>> CREATE SUBNET")
         res = self._ec2client.create_subnet(CidrBlock='10.1.0.0/24',VpcId=self._vpc_id)
         self._subnet_id = res['Subnet']['SubnetId']
         res = self._ec2client.create_tags(Resources=[self._subnet_id], Tags=[{"Key": "Name", "Value": self._name}])
         print("{}".format(res))
+
+    def delete_subnet(self):
+        print(">> Delete subnet")
+        res = self._ec2client.describe_subnets(Filters=[{"Name":"tag:Name","Values":[self._name]}])
+        print("{}".format(res))
+        for subnet in res["Subnets"]:
+            res = self._ec2client.delete_subnet(SubnetId=subnet['SubnetId'])
+            print("{}".format(res))
+
 
     def create_security_group(self):
         print(">>> CREATE SECURITY GROUP")
@@ -95,6 +138,14 @@ class Network:
         self._group_id = res['GroupId']
         res = self._ec2client.create_tags(Resources=[self._group_id], Tags=[{"Key": "Name", "Value": self._name}])
         print("{}".format(res))
+
+    def delete_security_group(self):
+        print(">> Delete security group {}".format(self._name))
+        res = self._ec2client.describe_security_groups(Filters=[{"Name":"tag:Name","Values":[self._name]}])
+        print("{}".format(res))
+        for sg in res['SecurityGroups']:
+            res = self._ec2client.delete_security_group(GroupId=sg["GroupId"])
+            print("{}".format(res))
 
     def create_security_group_ingress(self):
         print(">>>> CREATE SECURITY GROUP INGRESS")
@@ -126,6 +177,9 @@ class Network:
         print("{}".format(res))
 
     def create_network(self):
+        '''
+        Entry point
+        '''
         file = open("network_info_{}_{}.json".format(self._name, time.time()),"w")
         file.write("")
         network_info = {}
@@ -141,3 +195,17 @@ class Network:
             file.close()
 
         return network_info
+
+    def rm_network(self):
+        '''
+        Entry point
+        '''
+        self.delete_security_group()
+        self.delete_subnet()
+        self.delete_route_table()
+        self.delete_gateway()
+        self.delete_vpc()
+
+
+
+

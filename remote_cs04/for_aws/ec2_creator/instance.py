@@ -25,6 +25,10 @@ class Instance:
         self._pem = res['KeyMaterial']
         return self._pem
  
+    def delete_key_pair(self):
+        print(">>>> DELETE KeyPair")
+        self._ec2client.delete_key_pair(KeyName=self._name)
+
     def to_dict(self) -> Dict[str,str]:
         return {
             "name" : self._name,
@@ -57,7 +61,24 @@ class Instance:
         print("{}".format(res))
         self._instance_id = res['Instances'][0]['InstanceId']
 
+    def delete_ec2_instance(self):
+        print(">>>> DELETE Instance")
+        res = self._ec2client.describe_instances(
+            Filters=[{"Name":"tag:Name","Values":[self._name]}]
+            )
+        print("{}".format(res))
+
+        for reservation in res['Reservations']:
+            for instance in reservation['Instances']:
+                instance_id = instance['InstanceId']
+                res = self._ec2client.terminate_instances(InstanceIds=[instance_id])
+
+        print("{}".format(res))
+        
     def create_instance(self):
+        '''
+        
+        '''
         pem_file = open("{}.pem".format(self._name),"w")
         info_file = open("instance_info_{}_{}.json".format(self._name, time.time()),"w")
         pem_file.write("")
@@ -73,3 +94,19 @@ class Instance:
             pem_file.close()
             info_file.close()
         
+    def wait_instance_is_terminated(self):
+        while(True):
+            res = self._ec2client.describe_instances(
+                Filters=[{"Name":"tag:Name","Values":[self._name]}]
+                )
+            terminated = False
+            for reservation in res['Reservations']:
+                for instance in reservation['Instances']:
+                    instance_state = instance['State']['Name']
+                    print("------{}".format(instance_state))
+                    if instance_state != 'terminated':
+                        terminated = True
+            if terminated == False:
+                break
+            time.sleep(6)
+

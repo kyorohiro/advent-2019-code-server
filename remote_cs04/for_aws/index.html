@@ -1,0 +1,38 @@
+<html>
+    <head><title>Console</title></head>
+    <body>
+        <h1></h1>
+        <div style="margin: 15px;">
+            <h2>Users/Info</h2>
+            <div style="margin: 15px;">
+                name: {{username}}
+            </div>
+            <div style="margin: 15px;">
+                <form method="POST" action="/users.secret_info">
+                    <label>access_key_id</label>
+                    <input type="text" name="access_key_id" value="{{access_key_id}}"><br>
+                    <label>secret_key</label>
+                    <input type="password" name="secret_key" value="{{secret_key}}"><br>
+                    <label>region</label>
+                    <input type="text" name="region" value="{{region}}"><br>
+                    <input type="submit" value="UPDATE">
+                </form>
+            </div>
+        </div>
+        <div style="margin: 15px;">
+            <h2>New Instance</h2>
+            <div style="margin: 15px;">
+                <form method="POST" action="/users.secret_info">
+                    <label>name</label>
+                    <input type="text" name="access_key_id" value="advent-instance"><br>
+                    <label>cidr</label>
+                    <input type="text" name="cidr" value="10.1.0.0"><br>
+                    <label></label>
+                    <input type="text" name="instance_type" value="t2.micro"><br>
+                    <input type="submit" value="UPDATE">
+                </form>
+            </div>
+        </div>
+        
+    </body>
+</html>

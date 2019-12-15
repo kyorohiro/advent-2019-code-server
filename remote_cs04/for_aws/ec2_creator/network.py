@@ -9,8 +9,8 @@ from typing import Dict, List
 
 class Network:
 
-    def __init__(self):
-        self._name = "advent-code-server"
+    def __init__(self,access_key_id:None,secret_key:None):
+        self._name = "advent-instance"
         self._vpc_cidr_block = '10.1.0.0/16'
         self._subnet_cidr_block = '10.1.0.0/24'
         self._tcp_ports = [8443,8080,22]
@@ -19,8 +19,10 @@ class Network:
         self._gateway_id:str = None 
         self._route_table_id:str = None
         self._subnet_id:str = None
-        self._ec2client:ec2.Client = boto3.client("ec2")
+        session = boto3.Session(aws_access_key_id=access_key_id,aws_secret_access_key=secret_key)
+        self._ec2client:ec2.Client = session.client("ec2")
 
+    
     def to_dict(self):
         return {
             "name" : self._name,
@@ -38,13 +40,25 @@ class Network:
     def name(self) -> str:
         return self._name
 
+    @name.setter
+    def name(self, v):
+        self._name = v
+
     @property
     def vpc_cidr_block(self) -> str:
         return self._vpc_cidr_block
 
+    @vpc_cidr_block.setter
+    def vpc_cidr_block(self, v):
+        self._vpc_cidr_block = v
+
     @property
     def subnet_cidr_block(self) -> str:
         return self._subnet_cidr_block
+
+    @subnet_cidr_block.setter
+    def subnet_cidr_block(self, v):
+        self._vpc_cidr_block = v
 
     @property
     def tcp_ports(self) -> List[int]:

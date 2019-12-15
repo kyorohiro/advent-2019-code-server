@@ -22,13 +22,17 @@
         <div style="margin: 15px;">
             <h2>New Instance</h2>
             <div style="margin: 15px;">
-                <form method="POST" action="/users.secret_info">
+                <form method="POST" action="/insts.new">
                     <label>name</label>
-                    <input type="text" name="access_key_id" value="advent-instance"><br>
-                    <label>cidr</label>
-                    <input type="text" name="cidr" value="10.1.0.0"><br>
-                    <label></label>
+                    <input type="text" name="name" value="advent-instance"><br>
+                    <label>vpc_cidr</label>
+                    <input type="text" name="vpc_cidr_block" value="10.1.0.0/16"><br>
+                    <label>subnet_cidr</label>
+                    <input type="text" name="subnet_cidr_block" value="10.1.0.0/24"><br>
+                    <label>instance_type</label>
                     <input type="text" name="instance_type" value="t2.micro"><br>
+                    <label>image_type</label>
+                    <input type="text" name="image_type" value="ami-0cd744adeca97abb1"><br>
                     <input type="submit" value="UPDATE">
                 </form>
             </div>

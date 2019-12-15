@@ -10,7 +10,7 @@ from typing import Dict, List
 class Instance:
 
     def __init__(self):
-        self._name = "advent-code-server"
+        self._name = "advent-instance"
         self._ec2client:ec2.Client = boto3.client("ec2")
         self._instance_type = 't2.micro'
         self._image_type = "ami-0cd744adeca97abb1"

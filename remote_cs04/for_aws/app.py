@@ -8,6 +8,8 @@ import os
 import re
 from server.instance_info import InstanceInfo
 from ec2_creator.network import Network
+from ec2_creator.instance import Instance
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret key here'
@@ -111,8 +113,11 @@ def new_instance():
     network.name = name
     network.vpc_cidr_block = vpc_cidr_block
     network.subnet_cidr_block = subnet_cidr_block
+    instance:Instance = Instance(access_key_id=access_key_id.strip(),secret_key=secret_key.strip())
+
     def run():
         network.create_network()
+        instance.create_instance()
         
     threading.Thread(target=run).start()
     print("=========>{}".format(instance_info.to_dict()))

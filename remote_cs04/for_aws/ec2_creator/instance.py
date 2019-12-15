@@ -9,14 +9,31 @@ from typing import Dict, List
 
 class Instance:
 
-    def __init__(self):
+    def __init__(self,access_key_id:None,secret_key:None):
         self._name = "advent-instance"
-        self._ec2client:ec2.Client = boto3.client("ec2")
+        session = boto3.Session(aws_access_key_id=access_key_id,aws_secret_access_key=secret_key)
+
+        self._ec2client:ec2.Client = session.client("ec2")
         self._instance_type = 't2.micro'
         self._image_type = "ami-0cd744adeca97abb1"
         self._instance_id = None
         self._pem = None
  
+    @property
+    def instance_type(self):
+        return self._instance_type
+
+    @instance_type.setter
+    def instance_type(self, v):
+        self._instance_type = v
+
+    @property
+    def image_type(self):
+        return self._image_type
+
+    @image_type.setter
+    def image_type(self, v):
+        self._image_type = v
 
     def create_key_pair(self) -> str:
         print(">>> CREATE KEY_PAIR")

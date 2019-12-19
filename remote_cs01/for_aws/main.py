@@ -109,9 +109,9 @@ def delete_subnet():
         res = ec2client.delete_subnet(SubnetId=subnet['SubnetId'])
         print("{}".format(res))
 
-def create_security_group():
+def create_security_group(vpc_id):
     print(">>> CREATE SECURITY GROUP")
-    res = ec2client.create_security_group(Description="AdventCodeServer",GroupName=instance_name)
+    res = ec2client.create_security_group(Description="AdventCodeServer",GroupName=instance_name,VpcId=vpc_id)
     print("{}".format(res))
     group_id = res['GroupId']
     attach_tag(group_id)
@@ -124,10 +124,10 @@ def delete_security_group():
         res = ec2client.delete_security_group(GroupId=sg["GroupId"])
         print("{}".format(res))
 
-def create_security_group_ingress():
+def create_security_group_ingress(group_id):
         print(">>>> CREATE SECURITY GROUP INGRESS")
         res = ec2client.authorize_security_group_ingress(
-                GroupName=instance_name, IpPermissions=[
+                GroupId=group_id, IpPermissions=[
                     {
                         'IpProtocol': 'tcp',
                         'FromPort': 8443,
@@ -156,7 +156,7 @@ def create_security_group_ingress():
         print("{}".format(res))
 
 
-def create_instance():
+def create_instance(subnet_id:str, group_id:str):
 
     pem_file = open("{}.pem".format(instance_name),"w")
     pem_file.write("")
@@ -170,8 +170,9 @@ def create_instance():
         # Ubuntu Server 18.04 LTS (HVM), SSD Volume Type - ami-0cd744adeca97abb1 (64-bit x86) / ami-0f0dcd3794e1da1e1 (64-bit Arm)
         # https://aws.amazon.com/jp/amazon-linux-ami/
         res = ec2client.run_instances(ImageId="ami-0cd744adeca97abb1",#KeyName="xx",
-            SecurityGroups=[instance_name], InstanceType='t2.micro',
-            MinCount=1,MaxCount=1,KeyName=instance_name,
+            SecurityGroupIds=[group_id], 
+            InstanceType='t2.micro',
+            MinCount=1,MaxCount=1,KeyName=instance_name,SubnetId=subnet_id,
             TagSpecifications=[
                 {
                     'ResourceType': 'instance',
@@ -224,16 +225,18 @@ def wait_instance_is_terminated():
             break
         time.sleep(6)
 
-if __name__ == "__main__":
+def create():
     vpc_id:str = create_vpc()
     gateway_id:str = create_gateway(vpc_id)
     subnet_id = create_subnet(vpc_id)
-    group_id = create_security_group()
-    create_security_group_ingress()
+    group_id = create_security_group(vpc_id)
+    create_security_group_ingress(group_id)
     route_table_id = create_route_table(vpc_id)
     create_route(route_table_id, gateway_id)
     associate_route_table(route_table_id, subnet_id)    
-    create_instance()
+    create_instance(subnet_id, group_id)
+
+def delete():
     delete_instance()
     wait_instance_is_terminated()
     delete_route_table()    
@@ -242,11 +245,6 @@ if __name__ == "__main__":
     delete_gateway()
     delete_vpc()
 
-    res = ec2client.describe_route_tables(Filters=[{"Name":"tag:Name","Values":[instance_name]}])
-    print("{}".format(res))
-
-    print(">>> Delete vpcs")
-    res = ec2client.describe_vpcs(Filters=[{"Name":"tag:Name","Values":[instance_name]}])
-
-    ec2client.describe_subnets()
-    print("{}".format(res))
+if __name__ == "__main__":
+    #create()
+    delete()

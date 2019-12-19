@@ -232,20 +232,21 @@ if __name__ == "__main__":
     create_security_group_ingress()
     route_table_id = create_route_table(vpc_id)
     create_route(route_table_id, gateway_id)
-    associate_route_table(route_table_id, subnet_id)
-
-    
-    delete_route()
-    delete_route_table()
+    associate_route_table(route_table_id, subnet_id)    
     create_instance()
     delete_instance()
     wait_instance_is_terminated()
-    #
-    #
+    delete_route_table()    
     delete_security_group()
     delete_subnet()
     delete_gateway()
     delete_vpc()
 
-    #res = ec2client.describe_route_tables(Filters=[{"Name":"tag:Name","Values":[instance_name]}])
-    #print("{}".format(res))
+    res = ec2client.describe_route_tables(Filters=[{"Name":"tag:Name","Values":[instance_name]}])
+    print("{}".format(res))
+
+    print(">>> Delete vpcs")
+    res = ec2client.describe_vpcs(Filters=[{"Name":"tag:Name","Values":[instance_name]}])
+
+    ec2client.describe_subnets()
+    print("{}".format(res))

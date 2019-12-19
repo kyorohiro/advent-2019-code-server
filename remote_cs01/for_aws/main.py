@@ -170,9 +170,8 @@ def create_instance(subnet_id:str, group_id:str):
         # Ubuntu Server 18.04 LTS (HVM), SSD Volume Type - ami-0cd744adeca97abb1 (64-bit x86) / ami-0f0dcd3794e1da1e1 (64-bit Arm)
         # https://aws.amazon.com/jp/amazon-linux-ami/
         res = ec2client.run_instances(ImageId="ami-0cd744adeca97abb1",#KeyName="xx",
-            SecurityGroupIds=[group_id], 
             InstanceType='t2.micro',
-            MinCount=1,MaxCount=1,KeyName=instance_name,SubnetId=subnet_id,
+            MinCount=1,MaxCount=1,KeyName=instance_name,
             TagSpecifications=[
                 {
                     'ResourceType': 'instance',
@@ -183,7 +182,7 @@ def create_instance(subnet_id:str, group_id:str):
                     }
                     ]
                 }
-            ]
+            ],NetworkInterfaces=[{"SubnetId":subnet_id,'AssociatePublicIpAddress': True,'DeviceIndex':0,'Groups': [group_id]}]
             )
         print("{}".format(res))
     finally:
@@ -246,5 +245,5 @@ def delete():
     delete_vpc()
 
 if __name__ == "__main__":
-    #create()
+    create()
     delete()

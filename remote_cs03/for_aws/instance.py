@@ -16,6 +16,26 @@ class CodeServerInsrance:
         self._pem_data:str = ""
         self._image_id=image_id
 
+    @property
+    def ec2_client(self):
+        return self._ec2_client
+
+    @property
+    def project_name(self):
+        return self._project_name
+
+    @property
+    def instance_type(self):
+        return self._instance_type
+
+    @property
+    def pem_data(self):
+        return self._pem_data
+
+    @property
+    def image_id(self):
+        return self._image_id
+
     def create_pem(self):
         print(">>> CREATE KEY_PAIR")
         res = ec2client.create_key_pair(KeyName=self._project_name)

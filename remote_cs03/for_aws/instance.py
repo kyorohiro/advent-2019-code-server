@@ -99,13 +99,5 @@ class CodeServerInsrance:
             time.sleep(6)
 
 
-'''
-{
-    "vpc_id":vpc_id,
-    "gateway_id":gateway_id,
-    "subnet_id":subnet_id,
-    "group_id":group_id,
-    "route_table_id":route_table_id
-}
-'''
+
 

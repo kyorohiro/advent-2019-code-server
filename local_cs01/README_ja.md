@@ -7,8 +7,27 @@
 
 
 (1) [code-server って何?](https://qiita.com/kyorohiro/items/35bab591cd4a6b975c80)
+
 (2) [Dockerで独自のcode-server 環境を作って見る](https://qiita.com/kyorohiro/items/d991f6fbf77a425525c5)
+
 (3) [VSCode の Plugin を 利用してみる](https://qiita.com/kyorohiro/items/11a13d32c8748f3d7002)
+
+(4) [DBなども含めたMVC環境を用意してみよう (1)](https://qiita.com/kyorohiro/items/4ed279dd91e39321ed20)
+
+(5) [DBなども含めたMVC環境を用意してみよう (2)](https://qiita.com/kyorohiro/items/94c75a13ddccc5f39d85)
+
+(6) [DBなども含めたMVC環境を用意してみよう (3)](https://qiita.com/kyorohiro/items/71a8b6ce3cbb9b36019a)
+
+(7) [DBなども含めたMVC環境を用意してみよう (4)](https://qiita.com/kyorohiro/items/106ebb7003072a8dc989)
+
+(8) [DBなども含めたMVC環境を用意してみよう (5)](https://qiita.com/kyorohiro/items/a019e4ab6dcda55896e0)
+
+(9) [DBなども含めたMVC環境を用意してみよう (6)](https://qiita.com/kyorohiro/items/287364f03ed7a88f714e)
+
+(10) [おまけ](https://qiita.com/kyorohiro/items/f96d27bba9fb23c0a097)
+
+(NEXT->) [オンライン環境篇 1日目 作業環境を整備する](https://qiita.com/kyorohiro/items/603d6ee693fc2300079e)
+
 (..) ローカルで、DBなどの環境も含めて構築するには
 (..) オンライン上に置くには?
 (..) K8Sなどの最近の流行りの環境と連携するには?
@@ -59,6 +78,12 @@ https://marketplace.visualstudio.com/VSCode
 
 また、本番環境がLinuxの場合、本番環境と開発環境とで差異がなくなるわけですから、PFの違いによる問題などが出にくくなります。
 
+# PS
+
+## ソース
+https://github.com/kyorohiro/advent-2019-code-server
+
+
 
 ## Hello、World!!
 ※ Docker 環境が必要です!!
@@ -82,5 +107,11 @@ docker run -it -p 127.0.0.1:8080:8080 -v "${HOME}/.local/share/code-server:/home
 ## 次回
 
 Dockerで独自の環境を作ってみましょう。
+
+
+# PS
+
+## ソース
+https://github.com/kyorohiro/advent-2019-code-server
 
 

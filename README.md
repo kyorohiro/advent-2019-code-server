@@ -36,6 +36,8 @@ https://qiita.com/advent-calendar/2019/code-server
 
 (4)[Code-Serverをクラウドで動かしてみる](https://qiita.com/kyorohiro/items/3701fc97f61e94c5ba95)
 
+(5) [Docker 上で、code-server を立ち上げる](https://qiita.com/kyorohiro/items/ad9d5ac702bdebf93ad0)
+
 オンライン篇 5日目 Docker環境を構築してアレコレ
 
 オンライン篇 6日目 簡単な起動アプリを作成してみよう

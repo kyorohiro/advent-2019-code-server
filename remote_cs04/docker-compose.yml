@@ -1,15 +1,7 @@
 version: '3'
 services: 
-  #for_aws:
-  #  build: ./for_aws
-  #  ports: 
-  #    - 8443:8443
-  #    - 8080:8080
-  #  volumes:
-  #    - ./for_aws:/works/app
-  #  command: /works/code-server --allow-http --auth none --port 8443 /works/app
-  app:
-    build: ./app
+  for_aws:
+    build: ./for_aws
     ports: 
       - 8443:8443
       - 8080:8080
@@ -17,4 +9,3 @@ services:
       - ./for_aws:/works/app
     command: /works/code-server --allow-http --auth none --port 8443 /works/app
 
-    

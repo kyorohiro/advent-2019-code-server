@@ -157,4 +157,4 @@ $ python main.py --delete
 
 # コード
 
-https://github.com/kyorohiro/advent-2019-code-server/tree/master/remote_cs04
+https://github.com/kyorohiro/advent-2019-code-server/tree/master/remote_cs05

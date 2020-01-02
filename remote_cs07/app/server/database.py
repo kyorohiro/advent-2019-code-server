@@ -8,7 +8,7 @@ from Crypto.Cipher import AES
 import base64
 from server.common import *
 from server.user import User
-
+from server.instance_info import InstanceInfo
 
 class AppDatabase:
 
@@ -42,3 +42,8 @@ class AppDatabase:
     def update_user(self, user: User):
         user.update(self.get_db())
 
+    def update_instance_info(self, instance_info: InstanceInfo):
+        instance_info.save(self.get_db())
+
+    def find_instance_info(self,user_id:str) -> List[InstanceInfo]:
+        return InstanceInfo.find_instance_info(self.get_db(), user_id)

@@ -10,6 +10,7 @@ from server.common import *
 
 class User:
     def __init__(self):
+        self._id = None
         self._email = ""
         self._name = ""
         self._password = ""
@@ -17,6 +18,10 @@ class User:
         self._aws_secret_key = ""
         self._aws_region = ""
 
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def email(self):
@@ -83,6 +88,7 @@ class User:
             return User.create_empty_user()
 
         user = User()
+        user._id = _user.get("id", None)
         user._name = _user.get("name", "")
         user._email = _user.get("email", "")
         user._password = decrypt(_user.get("password", ""))

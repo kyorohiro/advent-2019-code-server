@@ -1,5 +1,6 @@
 <html>
     <head><title>Console</title></head>
+    <link rel="stylesheet" type="text/css" href="/statics/main.css">
     <body>
         <h1></h1>
         <div style="margin: 15px;">
@@ -29,10 +30,29 @@
                 </form>
             </div>
         </div>
+
+        <div style="margin: 15px;">
+            <table stylr="border: 1px solid black;"><thead><tr>
+                
+                <th>name</th><th>status</th><th>vpc_cidr_block</th><th>subnet_cidr_block</th><th>instance_type</th><th>image_type</th>
+                <th>vpc_id</th><th>gateway_id</th><th>route_table_id</th><th>subnet_id</th><th>group_id</th>
+                <th>key_name</th><th>instance_id</th>
+            </tr></thead>
+            <tr>
+            {% for i in instance_infos %}
+            
+            <td>{{i.name}}</td><td>{{i.status}}</td><td>{{i.vpc_cidr_block}}</td><td>{{i.subnet_cidr_block}}</td>
+            <td>{{i.instance_type}}</td><td>{{i.image_type}}</td>
+            <td>{{i.vpc_id}}</td><td>{{i.gateway_id}}</td><td>{{i.route_table_id}}</td><td>{{i.subnet_id}}</td><td>{{i.group_id}}</td>
+            <td>{{i.key_name}}</td><td>{{i.instance_id}}</td>
+            {% endfor %}
+            </tr>
+            </table>
+        </div>
         <div style="margin: 15px;">
             <h2>New Instance</h2>
             <div style="margin: 15px;">
-                <form method="POST" action="/insts.new">
+                <form method="POST" action="/inst.new">
                     <label>name</label>
                     <input type="text" name="name" value="advent-instance"><br>
                     <label>vpc_cidr</label>

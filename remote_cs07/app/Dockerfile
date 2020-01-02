@@ -3,6 +3,7 @@ FROM python:3.8.0-buster
 RUN apt-get update
 # code-server を取得するのに wget を install しておく
 RUN apt-get install -y wget
+RUN apt-get install -y sqlite3
 
 # 作業ディレクトリを /works にする。どこでも良いです
 WORKDIR /works

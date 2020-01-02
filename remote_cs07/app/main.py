@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_httpauth import HTTPDigestAuth
 import threading
 import dataset
@@ -7,8 +7,9 @@ from typing import Dict, List
 import os
 import re
 import server.database as sv_db
+from server.instance_info import InstanceInfo
 
-app = Flask(__name__)
+app = Flask(__name__,template_folder="/works/app/server/templates",static_folder="/works/app/server/statics", static_url_path="/statics")
 app.config['SECRET_KEY'] = 'secret key here'
 auth = HTTPDigestAuth()
 db_map:Dict[str, dataset.Database]= {}
@@ -51,10 +52,22 @@ def update_aws_info():
     app_db.update_user(user)
     return index()
 
-@app.route('/insts.new', methods=['POST', 'GET'])
+@app.route('/inst.new', methods=['POST'])
 @auth.login_required
 def new_instance():
-    pass
+    username = get_username_from_header()
+    user: sv_db.User = app_db.get_user_info_from_email(username)
+    #
+    instance_info:InstanceInfo = InstanceInfo()
+    instance_info._name = request.form.get('name', "")
+    instance_info._vpc_cidr_block = request.form.get('vpc_cidr_block', "")
+    instance_info._subnet_cidr_block = request.form.get('subnet_cidr_block', "")
+    instance_info._instance_type = request.form.get('instance_type', "")
+    instance_info._image_type = request.form.get('image_type', "")
+    instance_info._status = "before running"
+    instance_info._user_id = user.id
+    app_db.update_instance_info(instance_info)
+
     def run():
         pass
     #threading.Thread(target=run).start()
@@ -63,24 +76,21 @@ def new_instance():
     #print("=========>{}".format(secret_key))
     
     
-    
     return index()
 
 @app.route('/', methods=['GET'])
 @app.route('/aws_info.update', methods=['GET'])
 @app.route('/user_info.update', methods=['GET'])
+@app.route('/inst.new', methods=['GET'])
 @auth.login_required
 def index():
-    with open(os.path.join(root_dir,'server/index.html'),"rb") as f:
-        username = get_username_from_header()
-        user: sv_db.User = app_db.get_user_info_from_email(username)
-        #print("-->{}".format(user_secret_info))
-        cont:str = f.read().decode("utf-8")
-        cont = cont.replace("{{username}}",username)
-        cont = cont.replace("{{aws_access_key_id}}",user.aws_access_key_id)
-        cont = cont.replace("{{aws_secret_key}}",user.aws_secret_key[0:0])
-        cont = cont.replace("{{aws_region}}",user.aws_region)
-        return cont
+    username = get_username_from_header()
+    user: sv_db.User = app_db.get_user_info_from_email(username)
+    instance_infos: List[InstanceInfo] = app_db.find_instance_info(user.id)
+    print(f"===>{[i.to_dict() for i in instance_infos]} {user.id}")
+    return render_template("index.html", template_folder=f"server/templates", username = username,
+        aws_access_key_id = user.aws_access_key_id, aws_secret_key="",
+        aws_region = user.aws_region, instance_infos=[i.to_dict() for i in instance_infos])
 
 def setup():
     app_db.setup()

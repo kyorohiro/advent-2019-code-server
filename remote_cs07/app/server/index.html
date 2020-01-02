@@ -1,0 +1,52 @@
+<html>
+    <head><title>Console</title></head>
+    <body>
+        <h1></h1>
+        <div style="margin: 15px;">
+            <h2>User/Info</h2>
+            <div style="margin: 15px;">
+                <form method="POST" action="/user_info.update">
+                    <label>Email</label>
+                    {{username}}<br>
+                    <label>Password</label>
+                    <input type="password" name="password" value="{{password}}"><br>
+                    <input type="submit" value="UPDATE">
+                </form>
+            </div>
+        </div>
+
+        <div style="margin: 15px;">
+            <h2>AWS/Info</h2>
+            <div style="margin: 15px;">
+                <form method="POST" action="/aws_info.update">
+                    <label>access_key_id</label>
+                    <input type="text" name="aws_access_key_id" value="{{aws_access_key_id}}"><br>
+                    <label>secret_key</label>
+                    <input type="password" name="aws_secret_key" value="{{aws_secret_key}}"><br>
+                    <label>region</label>
+                    <input type="text" name="aws_region" value="{{aws_region}}"><br>
+                    <input type="submit" value="UPDATE">
+                </form>
+            </div>
+        </div>
+        <div style="margin: 15px;">
+            <h2>New Instance</h2>
+            <div style="margin: 15px;">
+                <form method="POST" action="/insts.new">
+                    <label>name</label>
+                    <input type="text" name="name" value="advent-instance"><br>
+                    <label>vpc_cidr</label>
+                    <input type="text" name="vpc_cidr_block" value="10.1.0.0/16"><br>
+                    <label>subnet_cidr</label>
+                    <input type="text" name="subnet_cidr_block" value="10.1.0.0/24"><br>
+                    <label>instance_type</label>
+                    <input type="text" name="instance_type" value="t2.micro"><br>
+                    <label>image_type</label>
+                    <input type="text" name="image_type" value="ami-0cd744adeca97abb1"><br>
+                    <input type="submit" value="UPDATE">
+                </form>
+            </div>
+        </div>
+        
+    </body>
+</html>

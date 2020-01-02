@@ -30,6 +30,58 @@ class InstanceInfo:
         self._status = ""
         self._ports = []
 
+    @property
+    def name(self):
+        return self._name
+    @property
+    def user_id(self):
+        return self._user_id
+    @property
+    def vpc_cidr_block(self):
+        return self._vpc_cidr_block
+    @property
+    def subnet_cidr_block(self):
+        return self._subnet_cidr_block
+    @property
+    def instance_type(self):
+        return self._instance_type
+    @property
+    def image_type(self):
+        return self._image_type
+    @property
+    def vpc_id(self):
+        return self._vpc_id
+    @property
+    def gateway_id(self):
+        return self._gateway_id
+    @property
+    def route_table_id(self):
+        return self._route_table_id
+    @property
+    def subnet_id(self):
+        return self._subnet_id
+    @property
+    def associate_id(self):
+        return self._associate_id
+    @property
+    def group_id(self):
+        return self._group_id
+    @property
+    def key_name(self):
+        return self._key_name
+    @property
+    def instance_id(self):
+        return self._instance_id
+    @property
+    def pem(self):
+        return self._pem
+    @property
+    def status(self):
+        return self._status
+    @property
+    def ports(self):
+        return self._ports
+
     def to_dict(self):
         return {
             "name" : self._name,
@@ -107,3 +159,7 @@ class InstanceInfo:
             system_table.insert({
                     "key": "instance_info_00",
                     "value":True})
+    @classmethod
+    def delete_from_name(cls, db:dataset.Database, name:str):
+        instance_table: dataset.Table = db.create_table("instance_infos")
+        instance_table.delete(name=name)

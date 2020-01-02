@@ -8,7 +8,7 @@ import os
 import re
 import server.database as sv_db
 from server.instance_info import InstanceInfo
-from aws.network import AWSNetwork
+from aws.network import AWSNetwork, create_network ,delete_network
 #
 import boto3
 import sys, getopt
@@ -63,6 +63,15 @@ def new_instance():
     username = get_username_from_header()
     user: sv_db.User = app_db.get_user_info_from_email(username)
     #
+    # CHECK
+    if "" == request.form.get('name', ""):
+        return index(f"Require Name {request.form.get('name', '')}") 
+
+    if request.form.get('name', "") in [i.name for i in app_db.find_instance_info(user.id)]:
+        return index(f"Already Exist {request.form.get('name', '')}")
+
+    #
+    #
     instance_info:InstanceInfo = InstanceInfo()
     instance_info._name = request.form.get('name', "")
     instance_info._vpc_cidr_block = request.form.get('vpc_cidr_block', "")
@@ -71,14 +80,17 @@ def new_instance():
     instance_info._image_type = request.form.get('image_type', "")
     instance_info._status = "before running"
     instance_info._user_id = user.id
+
+
     app_db.update_instance_info(instance_info)
 
-    ec2_client:ec2.Client = boto3.client("ec2", region_name=user.aws_region, 
-        aws_access_key_id=user.aws_access_key_id,aws_secret_access_key=user.aws_secret_key)
+    ec2_client:ec2.Client = boto3.client("ec2", region_name=user.aws_region.strip(), 
+        aws_access_key_id=user.aws_access_key_id.strip(),aws_secret_access_key=user.aws_secret_key.strip())
+    aws_network: AWSNetwork = AWSNetwork(ec2_client, project_name=instance_info._name, 
+        ports=[22,8443,8080], vpc_cidr_block=instance_info._vpc_cidr_block, subnet_cidr_block=instance_info._subnet_cidr_block)
 
     def run():
-        aws_network:AWSNetwork = AWSNetwork.create_network(ec2_client, project_name=instance_info._name, 
-        ports=[22,8443,8080], vpc_cidr_block=instance_info._vpc_cidr_block, subnet_cidr_block=instance_info._subnet_cidr_block)
+        create_network(aws_network)
         instance_info._vpc_id = aws_network.vpc_id
         instance_info._gateway_id = aws_network.gateway_id
         instance_info._subnet_id = aws_network.subnet_id
@@ -93,22 +105,56 @@ def new_instance():
     #print("=========>{}".format(access_key_id))
     #print("=========>{}".format(secret_key))
     
-    
+    return index()
+
+@app.route('/inst.delete', methods=['POST'])
+@auth.login_required
+def delete_instance():
+    username = get_username_from_header()
+    user: sv_db.User = app_db.get_user_info_from_email(username)
+    instance_info:InstanceInfo = InstanceInfo()
+    instance_info._name = request.form.get('name', "")
+
+    name =  request.form.get('name', "")
+    if name == "":
+        return index(f"Require Name {request.form.get('name', '')}") 
+
+    targets = [i for i in app_db.find_instance_info(user.id) if i.name == name]
+    if len(targets) == 0:
+        return index(f"Not Found {request.form.get('name', '')}") 
+
+    instance_info = targets[0]
+    ec2_client:ec2.Client = boto3.client("ec2", region_name=user.aws_region.strip(), 
+        aws_access_key_id=user.aws_access_key_id.strip(),aws_secret_access_key=user.aws_secret_key.strip())
+    print(f"===============>{instance_info._name}")
+    aws_network: AWSNetwork = AWSNetwork(ec2_client, project_name=instance_info._name.strip(), 
+        ports=[22,8443,8080], vpc_cidr_block=instance_info._vpc_cidr_block, subnet_cidr_block=instance_info._subnet_cidr_block)
+
+    def run():
+        print("===> delete network")
+        delete_network(aws_network)
+        print("===> delete instance info")
+        app_db.delete_instance_info(targets[0].name)
+        print("===> end")
+
+    threading.Thread(target=run).start()
     return index()
 
 @app.route('/', methods=['GET'])
 @app.route('/aws_info.update', methods=['GET'])
 @app.route('/user_info.update', methods=['GET'])
+@app.route('/inst.delete', methods=['GET'])
 @app.route('/inst.new', methods=['GET'])
 @auth.login_required
-def index():
+def index(error_message:str=""):
     username = get_username_from_header()
     user: sv_db.User = app_db.get_user_info_from_email(username)
     instance_infos: List[InstanceInfo] = app_db.find_instance_info(user.id)
     print(f"===>{[i.to_dict() for i in instance_infos]} {user.id}")
     return render_template("index.html", template_folder=f"server/templates", username = username,
         aws_access_key_id = user.aws_access_key_id, aws_secret_key="",
-        aws_region = user.aws_region, instance_infos=[i.to_dict() for i in instance_infos])
+        aws_region = user.aws_region, instance_infos=[i.to_dict() for i in instance_infos],
+        error_message = error_message)
 
 def setup():
     app_db.setup()

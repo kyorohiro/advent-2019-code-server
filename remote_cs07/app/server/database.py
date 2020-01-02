@@ -6,7 +6,7 @@ import os
 import re
 from Crypto.Cipher import AES
 import base64
-from server.common import *
+#from server.common import *
 from server.user import User
 from server.instance_info import InstanceInfo
 
@@ -48,3 +48,6 @@ class AppDatabase:
 
     def find_instance_info(self,user_id:str) -> List[InstanceInfo]:
         return InstanceInfo.find_instance_info(self.get_db(), user_id)
+
+    def delete_instance_info(self, name:str):
+        InstanceInfo.delete_from_name(self.get_db(),name)

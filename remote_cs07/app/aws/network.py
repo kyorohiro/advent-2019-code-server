@@ -233,27 +233,49 @@ class AWSNetwork:
             GroupId=group_id, IpPermissions=ip_permissions)
         print("{}".format(res))
 
-    @classmethod
-    def create_network(cls, ec2_client:ec2.Client, project_name="advent-code-server", ports=[22,8443,8080], 
-            vpc_cidr_block='10.1.0.0/16', subnet_cidr_block='10.1.0.0/24'):
-        print(">>> Create")
-        network: AWSNetwork = AWSNetwork(ec2_client, project_name, ports, vpc_cidr_block, subnet_cidr_block)
-        try:
-            vpc_id:str = network.create_vpc()
-            gateway_id:str = network.create_gateway(vpc_id)
-            subnet_id:str = network.create_subnet(vpc_id)
-            group_id:str = network.create_security_group(vpc_id)
-            network.create_security_group_ingress(group_id)
-            route_table_id:str = network.create_route_table(vpc_id)
-            network.create_route(route_table_id, gateway_id)
-            network.associate_route_table(route_table_id, subnet_id)
-        except :
-            pass
-        return network
-        #{
-        #    "vpc_id":vpc_id,
-        #    "gateway_id":gateway_id,
-        #    "subnet_id":subnet_id,
-        #    "group_id":group_id,
-        #    "route_table_id":route_table_id
-        #}
+    #
+    #
+    #
+    #
+
+def create_network(network:AWSNetwork):
+    print(">>> Create")
+    try:
+        vpc_id:str = network.create_vpc()
+        gateway_id:str = network.create_gateway(vpc_id)
+        subnet_id:str = network.create_subnet(vpc_id)
+        group_id:str = network.create_security_group(vpc_id)
+        network.create_security_group_ingress(group_id)
+        route_table_id:str = network.create_route_table(vpc_id)
+        network.create_route(route_table_id, gateway_id)
+        network.associate_route_table(route_table_id, subnet_id)
+    except :
+        pass
+    return network
+    #{
+    #    "vpc_id":vpc_id,
+    #    "gateway_id":gateway_id,
+    #    "subnet_id":subnet_id,
+    #    "group_id":group_id,
+    #    "route_table_id":route_table_id
+    #}
+def delete_network(network:AWSNetwork):
+    print(">>> Delete")
+    res = network.list_vpc()
+    print("{}".format(res))
+
+    # delete at vpc_id
+    for vpc in res["Vpcs"]:
+        vpc_id=vpc['VpcId']
+        network.delete_route_table(vpc_id)
+        network.delete_security_group(vpc_id)
+        network.delete_subnet(vpc_id) 
+        network.delete_gateway(vpc_id)
+        #delete_vpc(vpc_id)
+
+    # delete at instance name
+    network.delete_route_table()
+    network.delete_security_group()
+    network.delete_subnet()
+    network.delete_gateway()
+    network.delete_vpc()

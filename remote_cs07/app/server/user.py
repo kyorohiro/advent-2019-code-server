@@ -9,6 +9,11 @@ import base64
 from server.common import *
 
 class User:
+    """
+    User 情報
+    - ログイン用の情報
+    - AWS へ アクセスするための情報
+    """
     def __init__(self):
         self._id = None
         self._email = ""

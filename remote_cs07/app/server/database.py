@@ -35,6 +35,7 @@ class AppDatabase:
                 "key":"system_00",
                 "value":True})
         User.setup(db)
+        InstanceInfo.setup(db)
 
     def get_user_info_from_email(self, email:str) -> User:
         return User.find_one_from_email(self.get_db(), email)

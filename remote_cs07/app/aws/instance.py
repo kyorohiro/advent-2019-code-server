@@ -3,11 +3,11 @@ from boto3_type_annotations import ec2
 from botocore.exceptions import ClientError
 from typing import Dict, List 
 import time
-import network
+import aws.network
 
 ec2client:ec2.Client = boto3.client("ec2")
 
-class CodeServerInsrance:
+class AWSInstance:
 
     def __init__(self, ec2_client: ec2.Client, project_name="advent-code-server", instance_type='t2.micro', image_id="ami-0cd744adeca97abb1"):
         self._ec2_client:ec2.Client = ec2_client

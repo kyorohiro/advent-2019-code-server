@@ -8,6 +8,12 @@ import os
 import re
 import server.database as sv_db
 from server.instance_info import InstanceInfo
+from aws.network import AWSNetwork
+#
+import boto3
+import sys, getopt
+from boto3_type_annotations import ec2
+from botocore.exceptions import ClientError
 
 app = Flask(__name__,template_folder="/works/app/server/templates",static_folder="/works/app/server/statics", static_url_path="/statics")
 app.config['SECRET_KEY'] = 'secret key here'
@@ -23,7 +29,6 @@ def get_username_from_header():
     matched = re.match(r'.*username[ ]*=[ ]*"([^"]+)".*',auth_info)
     username = matched.groups()[0]
     return username
-
 
 @auth.get_password
 def get_password(email):
@@ -68,9 +73,22 @@ def new_instance():
     instance_info._user_id = user.id
     app_db.update_instance_info(instance_info)
 
+    ec2_client:ec2.Client = boto3.client("ec2", region_name=user.aws_region, 
+        aws_access_key_id=user.aws_access_key_id,aws_secret_access_key=user.aws_secret_key)
+
     def run():
-        pass
-    #threading.Thread(target=run).start()
+        aws_network:AWSNetwork = AWSNetwork.create_network(ec2_client, project_name=instance_info._name, 
+        ports=[22,8443,8080], vpc_cidr_block=instance_info._vpc_cidr_block, subnet_cidr_block=instance_info._subnet_cidr_block)
+        instance_info._vpc_id = aws_network.vpc_id
+        instance_info._gateway_id = aws_network.gateway_id
+        instance_info._subnet_id = aws_network.subnet_id
+        instance_info._route_table_id = aws_network._route_table_id
+        instance_info._associate_id = aws_network._associate_id
+        instance_info._group_id = aws_network._group_id
+        instance_info._status = "created network"
+        app_db.update_instance_info(instance_info)
+
+    threading.Thread(target=run).start()
     #print("=========>{}".format(instance_info.to_dict()))
     #print("=========>{}".format(access_key_id))
     #print("=========>{}".format(secret_key))

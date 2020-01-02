@@ -22,11 +22,13 @@ class InstanceInfo:
         self._gateway_id = ""
         self._route_table_id = ""
         self._subnet_id = ""
+        self._associate_id = ""
         self._group_id = ""
         self._key_name = ""
         self._instance_id = ""
         self._pem = ""
         self._status = ""
+        self._ports = []
 
     def to_dict(self):
         return {
@@ -41,6 +43,7 @@ class InstanceInfo:
             "route_table_id" : self._route_table_id,
             "subnet_id" : self._subnet_id,
             "group_id" : self._group_id,
+            "associate_id": self._associate_id,
             "key_name" : self._key_name,
             "instance_id" : self._instance_id,
             "pem" : self._pem,
@@ -71,27 +74,36 @@ class InstanceInfo:
         self._route_table_id = data.get("route_table_id","")
         self._subnet_id = data.get("subnet_id","")
         self._group_id = data.get("group_id","")
+        self._associate_id = data.get("associate_id","")
         self._key_name = data.get("key_name","")
         self._instance_id = data.get("instance_id","")
         self._pem = data.get("pem","")
         self._status = data.get("status","")
+        self._ports = data.get("ports","")
         return self
 
     @classmethod
-    def setup_db(cls, db:dataset.Database):
-        instance_info_table:dataset.Table = db.create_table("instance_infos")
-        instance_info_table.create_column("user_id", sqlalchemy.VARCHAR(256))
-        instance_info_table.create_column("name", sqlalchemy.VARCHAR(512))
-        instance_info_table.create_column("vpc_cidr_block", sqlalchemy.VARCHAR(64))
-        instance_info_table.create_column("subnet_cidr_block", sqlalchemy.VARCHAR(64))
-        instance_info_table.create_column("instance_type", sqlalchemy.VARCHAR(64))
-        instance_info_table.create_column("image_type", sqlalchemy.VARCHAR(64))
-        instance_info_table.create_column("vpc_id", sqlalchemy.VARCHAR(128))
-        instance_info_table.create_column("gateway_id", sqlalchemy.VARCHAR(128))
-        instance_info_table.create_column("route_table_id", sqlalchemy.VARCHAR(128))
-        instance_info_table.create_column("subnet_id", sqlalchemy.VARCHAR(128))
-        instance_info_table.create_column("group_id", sqlalchemy.VARCHAR(128))
-        instance_info_table.create_column("key_name", sqlalchemy.VARCHAR(128))
-        instance_info_table.create_column("instance_id", sqlalchemy.VARCHAR(128))
-        instance_info_table.create_column("pem", sqlalchemy.TEXT)
-        instance_info_table.create_column("status", sqlalchemy.VARCHAR(64))
+    def setup(cls, db:dataset.Database):
+        system_table = db.get_table("system")
+        if None == system_table.find_one(key = "instance_info_00"):
+            instance_info_table:dataset.Table = db.create_table("instance_infos")
+            instance_info_table.create_column("user_id", sqlalchemy.VARCHAR(256))
+            instance_info_table.create_column("name", sqlalchemy.VARCHAR(512))
+            instance_info_table.create_column("vpc_cidr_block", sqlalchemy.VARCHAR(64))
+            instance_info_table.create_column("subnet_cidr_block", sqlalchemy.VARCHAR(64))
+            instance_info_table.create_column("instance_type", sqlalchemy.VARCHAR(64))
+            instance_info_table.create_column("image_type", sqlalchemy.VARCHAR(64))
+            instance_info_table.create_column("vpc_id", sqlalchemy.VARCHAR(128))
+            instance_info_table.create_column("gateway_id", sqlalchemy.VARCHAR(128))
+            instance_info_table.create_column("route_table_id", sqlalchemy.VARCHAR(128))
+            instance_info_table.create_column("subnet_id", sqlalchemy.VARCHAR(128))
+            instance_info_table.create_column("group_id", sqlalchemy.VARCHAR(128))
+            instance_info_table.create_column("key_name", sqlalchemy.VARCHAR(128))
+            instance_info_table.create_column("instance_id", sqlalchemy.VARCHAR(128))
+            instance_info_table.create_column("associate_id", sqlalchemy.VARCHAR(128))
+            instance_info_table.create_column("pem", sqlalchemy.TEXT)
+            instance_info_table.create_column("status", sqlalchemy.VARCHAR(64))
+            instance_info_table.create_column("ports", sqlalchemy.VARCHAR(512))
+            system_table.insert({
+                    "key": "instance_info_00",
+                    "value":True})

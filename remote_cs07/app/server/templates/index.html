@@ -49,12 +49,15 @@
             {% for i in instance_infos %}
             <tr>
             <td>
-                <form method="POST" action="inst.delete">
+                <form method="POST" action="/inst.delete">
                     <input type="hidden" name="name" value="{{i.name}}">
                     <input type="submit" value="DELETE"></form><br>
-                <form method="POST" action="inst.get_pem">
+                <form method="POST" action="/inst.get_pem">
                     <input type="hidden" name="name" value="{{i.name}}">
                     <input type="submit" value="GET PEM"></form><br>
+                <form method="POST" action="/inst.get_info">
+                        <input type="hidden" name="name" value="{{i.name}}">
+                        <input type="submit" value="GET INFO"></form><br>
             </td>
             <td>{{i.name}}</td><td>{{i.status}}</td><td>{{i.vpc_cidr_block}}</td><td>{{i.subnet_cidr_block}}</td>
             <td>{{i.instance_type}}</td><td>{{i.image_type}}</td>

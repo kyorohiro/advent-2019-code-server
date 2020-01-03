@@ -17,7 +17,7 @@ import logging
 import server.database as sv_db
 from server.instance_info import InstanceInfo
 from aws.network import AWSNetwork, create_network ,delete_network
-from aws.instance import AWSInstance, create_instance, delete_instance
+from aws.instance import AWSInstance, create_instance, delete_instance, get_inst_at_str
 
 
 app = Flask(__name__,template_folder="/works/app/server/templates",static_folder="/works/app/server/statics", static_url_path="/statics")
@@ -93,6 +93,34 @@ def _update_aws_info():
         logging.exception("Failed at /aws_info.update", exc_info=True)
         return index("Failed at /aws_info.update")
 
+@app.route('/inst.get_info', methods=['POST'])
+@auth.login_required
+def _get_instance_info():
+    try:
+        username = get_username_from_header()
+        user: sv_db.User = app_db.get_user_info_from_email(username)
+        instance_infos: List[InstanceInfo] = app_db.find_instance_info(user.id)
+        name = request.form.get('name', "")
+        infos = [info for info in instance_infos if info.name == name]
+        if len(infos) <= 0:
+            return index("Not Found ")
+
+        try:
+            ec2_client:ec2.Client = boto3.client("ec2", region_name=user.aws_region.strip(), 
+            aws_access_key_id=user.aws_access_key_id.strip(),aws_secret_access_key=user.aws_secret_key.strip())
+        except:
+            logging.exception("Failed to create ec2 client", exc_info=True)
+            return index("Failed to create ec2 client ")
+
+        #print(f"==>{pems[0]}")
+        instance_info = infos[0]
+        aws_instance: AWSInstance = AWSInstance(ec2_client, project_name=instance_info._name, instance_type=instance_info._instance_type, image_id=instance_info.image_type)
+        #aws_instance.
+        
+        return flask.Response(response=get_inst_at_str(aws_instance), status=200, mimetype="text/plain")
+    except:
+        logging.exception("Failed at /inst.get_pem", exc_info=True)
+        return index("Failed at /inst.get_pem")
 
 @app.route('/inst.get_pem', methods=['POST'])
 @auth.login_required
@@ -108,8 +136,9 @@ def _get_pem():
         #print(f"==>{pems[0]}")
         return flask.Response(response=pems[0], status=200, mimetype="text/plain")
     except:
-        logging.exception("Failed at /inst.get_pem", exc_info=True)
-        return index("Failed at /inst.get_pem")
+        logging.exception("Failed at /inst.get_info", exc_info=True)
+        return index("Failed at /inst.get_info")
+
 
 @app.route('/inst.new', methods=['POST'])
 @auth.login_required

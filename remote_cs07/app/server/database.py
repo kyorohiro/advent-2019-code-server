@@ -6,9 +6,10 @@ import os
 import re
 from Crypto.Cipher import AES
 import base64
-#from server.common import *
+from server.common import encrypt, decrypt
 from server.user import User
 from server.instance_info import InstanceInfo
+import re
 
 class AppDatabase:
 
@@ -36,6 +37,22 @@ class AppDatabase:
                 "value":True})
         User.setup(db)
         InstanceInfo.setup(db)
+
+    def init_app(self, email: str, password:str):
+        db: dataset.Database = self.get_db()
+        system_table = db.get_table("system")
+        if None == system_table.find_one(key = "app_00"):
+            user: User = User()
+            user._email = email
+            user._name = re.sub(r"@.*$", "", email)
+            user._password = password
+            self.update_user(user)
+            system_table.insert({
+                "key":"app_00",
+                "value":True})
+            return True
+        else:
+            return False
 
     def get_user_info_from_email(self, email:str) -> User:
         return User.find_one_from_email(self.get_db(), email)

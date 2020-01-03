@@ -90,7 +90,7 @@ if __name__ == "__main__":
     for o, a in opts:
         if o in ("-c", "--create"):
             print(">CREATE")
-            network.create_network()
+            create_network(network)
             create_intance(instance, network)
             file = open(f'{project_name}.pem', "w")
             file.write(instance.pem_data)

@@ -6,7 +6,8 @@ import os
 import re
 from Crypto.Cipher import AES
 import base64
-from server.common import *
+from server.common import encrypt, decrypt
+
 
 class User:
     """
@@ -22,7 +23,6 @@ class User:
         self._aws_access_key_id = ""
         self._aws_secret_key = ""
         self._aws_region = ""
-
 
     @property
     def id(self):
@@ -61,10 +61,10 @@ class User:
                 user_table.create_column("email",sqlalchemy.VARCHAR(256))
                 user_table.create_column("password",sqlalchemy.VARCHAR(256))
 
-                user_table.insert({
-                    "name":"kyorohiro",
-                    "email":"kyorohiro@gmail.com",
-                    "password": encrypt("password (0_0)")})
+                #user_table.insert({
+                #    "name":"kyorohiro",
+                #    "email":"kyorohiro@gmail.com",
+                #    "password": encrypt("password (0_0)")})
                 system_table.insert({
                     "key":"user_00",
                     "value":True})
@@ -102,9 +102,31 @@ class User:
         user._aws_region = decrypt(_user.get("aws_region", ""))
         return user
 
+    @classmethod
+    def find_all(cls, db: dataset.Database, limit:int=100):
+        user_table: dataset.Table = db.create_table("users")
+        print(f"{[u for u in user_table.find()]}")
+        _users = user_table.find(_limit=limit)
+        
+        if _users == None:
+            return []
+
+        ret: List = []
+        for _user in _users:
+            user = User()
+            user._id = _user.get("id", None)
+            user._name = _user.get("name", "")
+            user._email = _user.get("email", "")
+            user._password = decrypt(_user.get("password", ""))
+            user._aws_access_key_id = decrypt(_user.get("aws_access_key_id", ""))
+            user._aws_secret_key = decrypt(_user.get("aws_secret_key", ""))
+            user._aws_region = decrypt(_user.get("aws_region", ""))
+            ret.append(user)
+        return ret
+
     def update(self, db: dataset.Database):
         user_table: dataset.Table = db.create_table("users")
-        user_table.update({
+        user_table.upsert({
             "email": self._email,
             "name": self._name,
             "password": encrypt(self._password),

@@ -2,7 +2,9 @@
     <head><title>Console</title></head>
     <link rel="stylesheet" type="text/css" href="/statics/main.css">
     <body>
-        <h1 style="color: RED;">{{ error_message }} </h1>
+        <div style="margin: 15px;">
+            <div style="color: RED;">{{ error_message }} </div>
+        </div>
         <div style="margin: 15px;">
             <h2>User/Info</h2>
             <div style="margin: 15px;">
@@ -12,6 +14,11 @@
                     <label>Password</label>
                     <input type="password" name="password" value="{{password}}"><br>
                     <input type="submit" value="UPDATE">
+                </form>
+            </div>
+            <div style="margin: 15px;">
+                <form method="POST" action="/app.logout">
+                    <input type="submit" value="LOGOUT">
                 </form>
             </div>
         </div>
@@ -39,18 +46,22 @@
                 <th>vpc_id</th><th>gateway_id</th><th>route_table_id</th><th>subnet_id</th><th>group_id</th>
                 <th>key_name</th><th>instance_id</th>
             </tr></thead>
-            <tr>
             {% for i in instance_infos %}
-            <td><form method="POST" action="inst.delete">
-                <input type="hidden" name="name" value="{{i.name}}">
-                <input type="submit" value="DELETE">
-            </form></td>
+            <tr>
+            <td>
+                <form method="POST" action="inst.delete">
+                    <input type="hidden" name="name" value="{{i.name}}">
+                    <input type="submit" value="DELETE"></form><br>
+                <form method="POST" action="inst.get_pem">
+                    <input type="hidden" name="name" value="{{i.name}}">
+                    <input type="submit" value="GET PEM"></form><br>
+            </td>
             <td>{{i.name}}</td><td>{{i.status}}</td><td>{{i.vpc_cidr_block}}</td><td>{{i.subnet_cidr_block}}</td>
             <td>{{i.instance_type}}</td><td>{{i.image_type}}</td>
             <td>{{i.vpc_id}}</td><td>{{i.gateway_id}}</td><td>{{i.route_table_id}}</td><td>{{i.subnet_id}}</td><td>{{i.group_id}}</td>
             <td>{{i.key_name}}</td><td>{{i.instance_id}}</td>
-            {% endfor %}
             </tr>
+            {% endfor %}
             </table>
         </div>
         <div style="margin: 15px;">
@@ -67,7 +78,7 @@
                     <input type="text" name="instance_type" value="t2.micro"><br>
                     <label>image_type</label>
                     <input type="text" name="image_type" value="ami-0cd744adeca97abb1"><br>
-                    <input type="submit" value="UPDATE">
+                    <input type="submit" value="CREATE">
                 </form>
             </div>
         </div>

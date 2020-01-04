@@ -119,7 +119,7 @@ class AWSInstance:
                 for instance in reservation['Instances']:
                     instance_state = instance['State']['Name']
                     print("------{}".format(instance_state))
-                    if instance_state != 'running':
+                    if instance_state == 'running':
                         running = True
             if running == True:
                 break

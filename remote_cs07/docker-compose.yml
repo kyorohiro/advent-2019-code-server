@@ -7,5 +7,5 @@ services:
       - 8080:8080
     volumes:
       - ./app:/works/app
-    command: /works/code-server --allow-http --auth none --port 8443 /works/app
+    command: /works/code-server --allow-http --auth password --port 8443 /works/app --cert 
 

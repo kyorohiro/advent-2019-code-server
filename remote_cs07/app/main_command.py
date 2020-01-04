@@ -20,6 +20,7 @@ git = "https://github.com/kyorohiro/advent-2019-code-server.git"
 git_dir = "advent-2019-code-server"
 path = "remote_cs07"
 sh = "sh create.sh"
+password = "hieake_goma_1224"
 
 
 def run_command(client: paramiko.SSHClient, command: str):
@@ -44,7 +45,7 @@ def run_script(ip:str, rsa_key_path:str):
     run_command(client, f"mkdir {project_name}")
     run_command(client, f"cd {project_name} ; git clone {git}")
     run_command(client, f"cd {project_name} ; git clone {git}")
-    run_command(client, f"cd {project_name}/{git_dir}/{path} ; sudo {sh}")
+    run_command(client, f"cd {project_name}/{git_dir}/{path} ; export PASSWORD={password} ;sudo {sh}")
 
 
     #run_command(client, "sudo docker run -p 0.0.0.0:8080:8080 -p0.0.0.0:8443:8443 codercom/code-server:v2 --cert")
@@ -72,7 +73,9 @@ if __name__ == "__main__":
             file = open(f'{project_name}.pem', "w")
             file.write(instance.pem_data)
             file.close()
+            file.flush()
             instance.wait_instance_is_running()
+            time.sleep(3)
             ip_list = get_ip(ec2_client, project_name)
             if len(ip_list) > 0:
                 run_script(ip_list[0],f"{project_name}.pem")
@@ -84,7 +87,9 @@ if __name__ == "__main__":
         elif o in ("-g","--get"):
             print(get_inst(ec2_client, project_name))
         elif o in ("-s","--start"):
-            pass
+            ip_list = get_ip(ec2_client, project_name)
+            if len(ip_list) > 0:
+                run_script(ip_list[0],f"{project_name}.pem")
         else:
             print(f"[how to use]")
             print(f"python main.py --create ")

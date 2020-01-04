@@ -6,74 +6,16 @@ from typing import Dict, List
 import time
 from aws.network import AWSNetwork
 from aws.instance import AWSInstance
+from aws.template import create_network, delete_network, create_instance, delete_instance, get_inst
 
+## PARAMS
+project_name = "advent-instance"
+ports = [22,8443,8080]
+vpc_cidr_block = '10.1.0.0/16'
+subnet_cidr_block = '10.1.0.0/24'
+instance_type = 't2.micro'
+image_id = "ami-0cd744adeca97abb1"
 
-def create_network(network:AWSNetwork):
-    print(">>> Create")
-    vpc_id:str = network.create_vpc()
-    gateway_id:str = network.create_gateway(vpc_id)
-    subnet_id = network.create_subnet(vpc_id)
-    group_id = network.create_security_group(vpc_id)
-    network.create_security_group_ingress(group_id)
-    route_table_id = network.create_route_table(vpc_id)
-    network.create_route(route_table_id, gateway_id)
-    network.associate_route_table(route_table_id, subnet_id)
-    return  {
-        "vpc_id":vpc_id,
-        "gateway_id":gateway_id,
-        "subnet_id":subnet_id,
-        "group_id":group_id,
-        "route_table_id":route_table_id
-    }
-
-
-def delete_network(network:AWSNetwork):
-    print(">>> Delete")
-    res = network.list_vpc()
-    print("{}".format(res))
-
-    # delete at vpc_id
-    for vpc in res["Vpcs"]:
-        vpc_id=vpc['VpcId']
-        network.delete_route_table(vpc_id)
-        network.delete_security_group(vpc_id)
-        network.delete_subnet(vpc_id) 
-        network.delete_gateway(vpc_id)
-        #delete_vpc(vpc_id)
-
-    # delete at instance name
-    network.delete_route_table()
-    network.delete_security_group()
-    network.delete_subnet()
-    network.delete_gateway()
-    network.delete_vpc()
-
-def create_intance(instance:AWSInstance, network:AWSNetwork):
-    instance.create_pem()
-    instance.create_instance(subnet_id=network.subnet_id, group_id=network.group_id)
-
-def delete_intance(instance:AWSInstance):
-    instance.delete_pem()
-    instance.delete_instance()
-
-def get_inst(ec2_client:ec2.Client, project_name="advent-code-server"):
-    try:
-        print(">>>> ec2client.describe_instances")
-        res = ec2_client.describe_instances(Filters=[{"Name":"tag:Name","Values":[project_name]}])
-        print("{}".format(res))
-
-        for reserve_info in res['Reservations']:
-            print("-")
-            for instance_info in reserve_info['Instances']:
-                print(">>>> {}".format(instance_info.get('InstanceId',"")))
-                print(">>>> {}".format(instance_info.get('PublicDnsName',"")))
-                print(">>>> {}".format(instance_info.get('PublicIpAddress',"")))
-                print(">>>> {}".format(instance_info.get('PrivateDnsName',"")))
-                print(">>>> {}".format(instance_info.get('PrivateIpAddress',"")))
-                print(">>>> {}".format(instance_info.get('State',"")))
- 
-    except ClientError as e:
-        print("-- {}".format(e.response))
 
 if __name__ == "__main__":
     try:
@@ -84,24 +26,24 @@ if __name__ == "__main__":
     opts = [("-h")] if len(opts) == 0 else opts
     project_name = "advent-instance"
     ec2_client:ec2.Client = boto3.client("ec2")
-    network:AWSNetwork = AWSNetwork(ec2_client, project_name=project_name, ports=[22,8443,8080], vpc_cidr_block='10.1.0.0/16', subnet_cidr_block='10.1.0.0/24')
-    instance:AWSInstance = AWSInstance(ec2_client, project_name=project_name, instance_type='t2.micro', image_id="ami-0cd744adeca97abb1")
+    network:AWSNetwork = AWSNetwork(ec2_client, project_name=project_name, ports=ports, vpc_cidr_block=vpc_cidr_block, subnet_cidr_block=subnet_cidr_block)
+    instance:AWSInstance = AWSInstance(ec2_client, project_name=project_name, instance_type=instance_type, image_id=image_id)
 
     for o, a in opts:
         if o in ("-c", "--create"):
             print(">CREATE")
             create_network(network)
-            create_intance(instance, network)
+            create_instance(instance, network)
             file = open(f'{project_name}.pem', "w")
             file.write(instance.pem_data)
             file.close()
         elif o in ("-d", "--delete"):
             print(">DELETE")
-            delete_intance(instance)
+            delete_instance(instance)
             instance.wait_instance_is_terminated()
             delete_network(network)
         elif o in ("-g","--get"):
-            get_inst(ec2_client, project_name)
+            print(get_inst(ec2_client, project_name))
         else:
             print(f"[how to use]")
             print(f"python main.py --create ")

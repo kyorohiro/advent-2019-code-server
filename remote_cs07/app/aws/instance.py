@@ -105,31 +105,3 @@ class AWSInstance:
 
 
 
-
-def create_instance(instance:AWSInstance, network:AWSNetwork):
-    instance.create_pem()
-    instance.create_instance(subnet_id=network.subnet_id, group_id=network.group_id)
-
-def delete_instance(instance:AWSInstance):
-    instance.delete_pem()
-    instance.delete_instance()
-
-def get_inst_at_str(instance:AWSInstance) -> str:
-    strs: List[str] = []
-    try:
-        print(">>>> ec2client.describe_instances")
-        res = instance._ec2_client.describe_instances(Filters=[{"Name":"tag:Name","Values":[instance.project_name]}])
-        print("{}".format(res))
-
-        for reserve_info in res['Reservations']:
-            strs.append("-")
-            for instance_info in reserve_info['Instances']:
-                strs.append(">>>> {}".format(instance_info.get('InstanceId',"")))
-                strs.append(">>>> {}".format(instance_info.get('PublicDnsName',"")))
-                strs.append(">>>> {}".format(instance_info.get('PublicIpAddress',"")))
-                strs.append(">>>> {}".format(instance_info.get('PrivateDnsName',"")))
-                strs.append(">>>> {}".format(instance_info.get('PrivateIpAddress',"")))
-                strs.append(">>>> {}".format(instance_info.get('State',"")))
-    except ClientError as e:
-        strs.append("-- {}".format(e.response))
-    return "\n".join(strs)

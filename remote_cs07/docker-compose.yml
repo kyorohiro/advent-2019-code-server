@@ -7,5 +7,7 @@ services:
       - 8080:8080
     volumes:
       - ./app:/works/app
+    environment: 
+      - PASSWORD=dummy_password
     command: /works/code-server --allow-http --auth password --port 8443 /works/app --cert 
 

@@ -15,7 +15,9 @@ vpc_cidr_block = '10.1.0.0/16'
 subnet_cidr_block = '10.1.0.0/24'
 instance_type = 't2.micro'
 image_id = "ami-0cd744adeca97abb1"
-
+git = "https://github.com/kyorohiro/advent-2019-code-server.git"
+path = "remote_cs07"
+sh = "sh start.sh"
 
 if __name__ == "__main__":
     try:

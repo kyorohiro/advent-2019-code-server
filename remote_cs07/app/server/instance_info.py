@@ -29,6 +29,9 @@ class InstanceInfo:
         self._pem = ""
         self._status = ""
         self._ports = []
+        self._git = ""
+        self._path = ""
+        self._sh = ""
 
     @property
     def name(self):
@@ -82,6 +85,18 @@ class InstanceInfo:
     def ports(self):
         return self._ports
 
+    @property
+    def git(self):
+        return self._git
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def sh(self):
+        return self._sh
+
     def to_dict(self):
         return {
             "name" : self._name,
@@ -99,7 +114,10 @@ class InstanceInfo:
             "key_name" : self._key_name,
             "instance_id" : self._instance_id,
             "pem" : self._pem,
-            "status" : self._status
+            "status" : self._status,
+            "git" : self._git,
+            "path" : self._path,
+            "sh" : self._sh
         }
 
     def save(self, db:dataset.Database):
@@ -132,6 +150,9 @@ class InstanceInfo:
         self._pem = data.get("pem","")
         self._status = data.get("status","")
         self._ports = data.get("ports","")
+        self._git = data.get("git","")
+        self._path = data.get("path","")
+        self._sh = data.get("sh","")
         return self
 
     @classmethod
@@ -156,6 +177,10 @@ class InstanceInfo:
             instance_info_table.create_column("pem", sqlalchemy.TEXT)
             instance_info_table.create_column("status", sqlalchemy.VARCHAR(64))
             instance_info_table.create_column("ports", sqlalchemy.VARCHAR(512))
+            instance_info_table.create_column("git", sqlalchemy.VARCHAR(512))
+            instance_info_table.create_column("path", sqlalchemy.VARCHAR(512))
+            instance_info_table.create_column("sh", sqlalchemy.VARCHAR(512))
+
             system_table.insert({
                     "key": "instance_info_00",
                     "value":True})

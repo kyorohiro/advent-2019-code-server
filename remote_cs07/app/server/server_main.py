@@ -178,6 +178,10 @@ def _new_instance():
         instance_info._subnet_cidr_block = request.form.get('subnet_cidr_block', "")
         instance_info._instance_type = request.form.get('instance_type', "")
         instance_info._image_type = request.form.get('image_type', "")
+        instance_info._git = request.form.get('git', "")
+        instance_info._path = request.form.get('path', "")
+        instance_info._sh = request.form.get('sh', "")
+
         instance_info._status = "before running"
         instance_info._user_id = user.id
         app_db.update_instance_info(instance_info)

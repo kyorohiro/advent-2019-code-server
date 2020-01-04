@@ -79,3 +79,31 @@ def get_inst(ec2_client: EC2Client, project_name) -> str:
     except Exception as e:
         strs.append("-- {}".format(e.args))
     return "\n".join(strs)
+
+def stop_running_instance(ec2_client: EC2Client, project_name) -> List[str]:
+    print(">>>> ec2client.describe_instances")
+    res = ec2_client.describe_instances(Filters=[{"Name":"tag:Name","Values":[project_name]}])
+    print("{}".format(res))
+    ip_list: List[str] = []
+    for reserve_info in res['Reservations']:
+        for instance_info in reserve_info['Instances']:
+            if "running" == instance_info.get('State',{}).get("Name",""):
+                ec2_client.stop_instances(InstanceIds=[instance_info['InstanceId']])
+                ip = instance_info.get('PublicIpAddress', None)
+                if ip is not None:
+                    ip_list.append(ip)
+    return ip_list
+
+def start_stopped_instance(ec2_client: EC2Client, project_name) -> List[str]:
+    print(">>>> ec2client.describe_instances")
+    res = ec2_client.describe_instances(Filters=[{"Name":"tag:Name","Values":[project_name]}])
+    print("{}".format(res))
+    ip_list: List[str] = []
+    for reserve_info in res['Reservations']:
+        for instance_info in reserve_info['Instances']:
+            if "stopped" == instance_info.get('State',{}).get("Name",""):
+                ec2_client.start_instances(InstanceIds=[instance_info['InstanceId']])
+                ip = instance_info.get('PublicIpAddress', None)
+                if ip is not None:
+                    ip_list.append(ip)
+    return ip_list

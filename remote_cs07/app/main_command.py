@@ -6,7 +6,7 @@ from typing import Dict, List
 import time
 from aws.network import AWSNetwork
 from aws.instance import AWSInstance
-from aws.template import create_network, delete_network, create_instance, delete_instance, get_inst, get_ip
+from aws.template import create_network, delete_network, create_instance, delete_instance, get_inst, get_ip, stop_running_instance, start_stopped_instance
 import paramiko
 import re
 ## PARAMS
@@ -32,7 +32,7 @@ def run_command(client: paramiko.SSHClient, command: str):
     print(f"stderr>\n{d}")
     return stdin
 
-def run_script(ip:str, rsa_key_path:str):
+def run_create_script(ip:str, rsa_key_path:str):
     rsa_key: paramiko.rsakey.RSAKey = paramiko.rsakey.RSAKey.from_private_key_file(rsa_key_path)
     client: paramiko.SSHClient = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -45,16 +45,20 @@ def run_script(ip:str, rsa_key_path:str):
     run_command(client, f"mkdir {project_name}")
     run_command(client, f"cd {project_name} ; git clone {git}")
     run_command(client, f"cd {project_name}/{git_dir}/{path} ; sudo {sh} {password}")
-
-
-    #run_command(client, "sudo docker run -p 0.0.0.0:8080:8080 -p0.0.0.0:8443:8443 codercom/code-server:v2 --cert")
     
     client.close()
 
+def run_start_script(ip:str, rsa_key_path:str):
+    rsa_key: paramiko.rsakey.RSAKey = paramiko.rsakey.RSAKey.from_private_key_file(rsa_key_path)
+    client: paramiko.SSHClient = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(ip, username="ubuntu", pkey=rsa_key)
+    run_command(client, f"cd {project_name}/{git_dir}/{path} ; sudo {sh} {password}")
+    client.close()
 
 if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], ":hcdgs", ["help", "create","delete","get","start"])
+        opts, args = getopt.getopt(sys.argv[1:], ":hcdgs", ["help", "create","delete","get","start","stop"])
     except getopt.GetoptError as err:
         raise err
 
@@ -81,10 +85,17 @@ if __name__ == "__main__":
             delete_network(network)
         elif o in ("-g","--get"):
             print(get_inst(ec2_client, project_name))
-        elif o in ("-s","--start"):
+        elif o in ("-c","--create"):
             ip_list = get_ip(ec2_client, project_name)
             if len(ip_list) > 0:
-                run_script(ip_list[0],f"{project_name}.pem")
+                run_create_script(ip_list[0],f"{project_name}.pem")
+        elif o in ("-s","--stop"):
+            stop_running_instance(ec2_client, project_name)
+        elif o in ("-s","--start"):
+            start_stopped_instance(ec2_client, project_name)
+            ip_list = get_ip(ec2_client, project_name)
+            if len(ip_list) > 0:
+                run_start_script(ip_list[0],f"{project_name}.pem")
         else:
             print(f"[how to use]")
             print(f"python main.py --create ")

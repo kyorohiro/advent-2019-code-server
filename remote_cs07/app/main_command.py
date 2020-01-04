@@ -20,7 +20,7 @@ git = "https://github.com/kyorohiro/advent-2019-code-server.git"
 git_dir = "advent-2019-code-server"
 path = "remote_cs07"
 sh = "sh create.sh"
-password = "hieake_goma_1224"
+password = "password1224"
 
 
 def run_command(client: paramiko.SSHClient, command: str):
@@ -45,7 +45,7 @@ def run_script(ip:str, rsa_key_path:str):
     run_command(client, f"mkdir {project_name}")
     run_command(client, f"cd {project_name} ; git clone {git}")
     run_command(client, f"cd {project_name} ; git clone {git}")
-    run_command(client, f"cd {project_name}/{git_dir}/{path} ; export PASSWORD={password} ;sudo {sh}")
+    run_command(client, f"cd {project_name}/{git_dir}/{path} ; sudo {sh} {password}")
 
 
     #run_command(client, "sudo docker run -p 0.0.0.0:8080:8080 -p0.0.0.0:8443:8443 codercom/code-server:v2 --cert")
@@ -60,7 +60,6 @@ if __name__ == "__main__":
         raise err
 
     opts = [("-h")] if len(opts) == 0 else opts
-    project_name = "advent-instance"
     ec2_client:ec2.Client = boto3.client("ec2")
     network:AWSNetwork = AWSNetwork(ec2_client, project_name=project_name, ports=ports, vpc_cidr_block=vpc_cidr_block, subnet_cidr_block=subnet_cidr_block)
     instance:AWSInstance = AWSInstance(ec2_client, project_name=project_name, instance_type=instance_type, image_id=image_id)
@@ -72,8 +71,8 @@ if __name__ == "__main__":
             create_instance(instance, network)
             file = open(f'{project_name}.pem', "w")
             file.write(instance.pem_data)
-            file.close()
             file.flush()
+            file.close()
             instance.wait_instance_is_running()
             time.sleep(3)
             ip_list = get_ip(ec2_client, project_name)

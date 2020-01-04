@@ -1,4 +1,7 @@
-EC2 Instance を起動して、そこに Github 上の Docker Image を配置するスクリプト
+
+This Script create ec2 instance and run docker image on Github repogitory
+
+
 
 ```
 $ git clone https://github.com/kyorohiro/advent-2019-code-server.git
@@ -7,10 +10,10 @@ $ docker-compose build
 $ docker-compose up -d
 ```
 
-ブラウザで、`http://127.0.0.1:8443/` を開く。
+open `http://127.0.0.1:8443/` at browser
 
 
-Terminal 上で
+on vscode 's terminal
 
 ```bash:Terminal
 $ pip install -r requirements.txt
@@ -19,13 +22,13 @@ $ aws configure
 ..
 ```
 
-EC2Instance を 作成
+create ec2 instance
 
 ```
 $ python main.py --create
 ```
 
-EC2 情報を取得
+get ec2 infomation
 
 ```
 $ python main.py --get
@@ -40,25 +43,25 @@ $ python main.py --get
 http://3.112.18.33:8443/
 
 
-## 削除
+## delete
 
 ```
 $ python main.py --delete
 ```
 
-## 一時停止
+## stop
 
 ```
 $ python main.py --stop
 ```
 
-## 再開
+## start 
 
 ```
 $ python main.py --start
 ```
 
-## SSHで中に入る
+## ssh command
 
 ```
 $ ssh -i advent-instance.pem ubuntu@3.112.18.33

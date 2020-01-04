@@ -16,9 +16,9 @@ import logging
 #
 import server.database as sv_db
 from server.instance_info import InstanceInfo
-from aws.network import AWSNetwork, create_network ,delete_network
-from aws.instance import AWSInstance, create_instance, delete_instance, get_inst_at_str
-
+from aws.network import AWSNetwork
+from aws.instance import AWSInstance
+from aws.template import  create_network ,delete_network, create_instance, delete_instance, get_inst
 
 app = Flask(__name__,template_folder="/works/app/server/templates",static_folder="/works/app/server/statics", static_url_path="/statics")
 app.config['SECRET_KEY'] = 'secret key here'
@@ -37,26 +37,36 @@ def get_username_from_header():
 
 @auth.get_password
 def _get_password_from_db(email):
+    """
+    For Digest Auth 
+    """
     user: sv_db.User = app_db.get_user_info_from_email(email)
     if user != None:
         return user.password
     return None
 
 @app.route('/app.init', methods=['POST'])
-def _init_app():
+def _app_init():
+    """
+    Initiazlie App 
+     - add user
+    """
     try:
         password = request.form.get('password', "")
         email = request.form.get('email', "")
         if app_db.init_app(email, password):
-            return index()
+            return "Initialized!!"
         else:
             return "Already Initialized"
     except:
         logging.exception("Failed at /app.init", exc_info=True)
-        return index("Failed at /app.init")        
+        return "Failed at /app.init"
 
 @app.route('/app.logout', methods=['POST'])
 def _logout_app():
+    """
+    Logout
+    """
     resp = flask.make_response("<a href='/'>back to index</a>")
     resp.status_code = 401
     return resp
@@ -112,12 +122,8 @@ def _get_instance_info():
             logging.exception("Failed to create ec2 client", exc_info=True)
             return index("Failed to create ec2 client ")
 
-        #print(f"==>{pems[0]}")
         instance_info = infos[0]
-        aws_instance: AWSInstance = AWSInstance(ec2_client, project_name=instance_info._name, instance_type=instance_info._instance_type, image_id=instance_info.image_type)
-        #aws_instance.
-        
-        return flask.Response(response=get_inst_at_str(aws_instance), status=200, mimetype="text/plain")
+        return flask.Response(response=get_inst(ec2_client,instance_info._name), status=200, mimetype="text/plain")
     except:
         logging.exception("Failed at /inst.get_pem", exc_info=True)
         return index("Failed at /inst.get_pem")

@@ -87,8 +87,11 @@ class AWSInstance:
 
         print("{}".format(res))
 
-    def wait_instance_is_terminated(self):
+    def wait_instance_is_terminated(self, limit=120):
+        i=0
         while(True):
+            if i*6 > limit:
+                break
             res = self._ec2_client.describe_instances(
                 Filters=[{"Name":"tag:Name","Values":[self._project_name]}]
                 )
@@ -103,5 +106,22 @@ class AWSInstance:
                 break
             time.sleep(6)
 
-
+    def wait_instance_is_running(self, limit=120):
+        i=0
+        while(True):
+            if i*6 > limit:
+                break
+            res = self._ec2_client.describe_instances(
+                Filters=[{"Name":"tag:Name","Values":[self._project_name]}]
+                )
+            running = False
+            for reservation in res['Reservations']:
+                for instance in reservation['Instances']:
+                    instance_state = instance['State']['Name']
+                    print("------{}".format(instance_state))
+                    if instance_state != 'running':
+                        running = True
+            if running == True:
+                break
+            time.sleep(6)
 

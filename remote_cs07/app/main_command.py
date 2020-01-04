@@ -19,7 +19,7 @@ image_id = "ami-0cd744adeca97abb1"
 git = "https://github.com/kyorohiro/advent-2019-code-server.git"
 git_dir = "advent-2019-code-server"
 path = "remote_cs07"
-sh = "sh start.sh"
+sh = "sh create.sh"
 
 
 def run_command(client: paramiko.SSHClient, command: str):
@@ -72,6 +72,10 @@ if __name__ == "__main__":
             file = open(f'{project_name}.pem', "w")
             file.write(instance.pem_data)
             file.close()
+            instance.wait_instance_is_running()
+            ip_list = get_ip(ec2_client, project_name)
+            if len(ip_list) > 0:
+                run_script(ip_list[0],f"{project_name}.pem")
         elif o in ("-d", "--delete"):
             print(">DELETE")
             delete_instance(instance)
@@ -80,9 +84,7 @@ if __name__ == "__main__":
         elif o in ("-g","--get"):
             print(get_inst(ec2_client, project_name))
         elif o in ("-s","--start"):
-            ip_list = get_ip(ec2_client, project_name)
-            if len(ip_list) > 0:
-                run_script(ip_list[0],f"{project_name}.pem")
+            pass
         else:
             print(f"[how to use]")
             print(f"python main.py --create ")

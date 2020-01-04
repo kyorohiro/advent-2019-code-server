@@ -69,7 +69,6 @@ class AWSInstance:
         self._instance_id = res['Instances'][0]['InstanceId']
         return self._project_name
 
-
     def delete_instance(self):
         print(">>>> self._ec2_client.describe_instances")
         res = self._ec2_client.describe_instances(

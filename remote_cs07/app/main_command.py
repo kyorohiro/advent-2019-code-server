@@ -44,7 +44,6 @@ def run_script(ip:str, rsa_key_path:str):
     run_command(client, "sudo apt-get install docker-compose -y")
     run_command(client, f"mkdir {project_name}")
     run_command(client, f"cd {project_name} ; git clone {git}")
-    run_command(client, f"cd {project_name} ; git clone {git}")
     run_command(client, f"cd {project_name}/{git_dir}/{path} ; sudo {sh} {password}")
 
 
@@ -74,7 +73,7 @@ if __name__ == "__main__":
             file.flush()
             file.close()
             instance.wait_instance_is_running()
-            time.sleep(3)
+            time.sleep(6)
             ip_list = get_ip(ec2_client, project_name)
             if len(ip_list) > 0:
                 run_script(ip_list[0],f"{project_name}.pem")

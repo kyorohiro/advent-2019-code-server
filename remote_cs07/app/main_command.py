@@ -72,12 +72,8 @@ if __name__ == "__main__":
             file.write(instance.pem_data)
             file.flush()
             file.close()
+            print(">WAIT RUNNING")
             instance.wait_instance_is_running()
-            # following sleep is for ports 22 
-            time.sleep(10)
-            ip_list = get_ip(ec2_client, project_name)
-            if len(ip_list) > 0:
-                run_script(ip_list[0],f"{project_name}.pem")
         elif o in ("-d", "--delete"):
             print(">DELETE")
             delete_instance(instance)

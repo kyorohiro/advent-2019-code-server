@@ -47,6 +47,19 @@ def delete_instance(instance:AWSInstance):
     instance.delete_pem()
     instance.delete_instance()
 
+def get_ip(ec2_client: EC2Client, project_name) -> List[str]:
+    print(">>>> ec2client.describe_instances")
+    res = ec2_client.describe_instances(Filters=[{"Name":"tag:Name","Values":[project_name]}])
+    print("{}".format(res))
+    ip_list: List[str] = []
+    for reserve_info in res['Reservations']:
+        for instance_info in reserve_info['Instances']:
+            if "running" == instance_info.get('State',{}).get("Name",""):
+                ip = instance_info.get('PublicIpAddress', None)
+                if ip is not None:
+                    ip_list.append(ip)
+    return ip_list
+
 def get_inst(ec2_client: EC2Client, project_name) -> str:
     strs: List[str] = []
     try:

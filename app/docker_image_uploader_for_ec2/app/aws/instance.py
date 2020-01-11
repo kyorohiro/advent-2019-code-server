@@ -5,7 +5,6 @@ from typing import Dict, List
 import time
 from aws.network import AWSNetwork
 
-#self._ec2_client:ec2.Client = boto3.client("ec2")
 
 class AWSInstance:
 

@@ -26,7 +26,7 @@ sh = "sh create.sh"
 password = "password1224"
 
 
-def run_command(client: paramiko.SSHClient, command: str):
+def run_command_on_instance(client: paramiko.SSHClient, command: str):
     logging.info(f"# run>{command}\n")
     stdin, stdout, stderr = client.exec_command(command)
     d = stdout.read().decode('utf-8')
@@ -35,7 +35,7 @@ def run_command(client: paramiko.SSHClient, command: str):
     logging.info(f"# stderr>\n{d}")
     return stdin
 
-def run_create_script(ip:str, rsa_key_path:str):
+def create_app(ip:str, rsa_key_path:str):
     logging.info(f"# run_create_script {ip}\n")
     rsa_key: paramiko.rsakey.RSAKey = paramiko.rsakey.RSAKey.from_private_key_file(rsa_key_path)
     client: paramiko.SSHClient = paramiko.SSHClient()
@@ -50,19 +50,19 @@ def run_create_script(ip:str, rsa_key_path:str):
         logging.info(f"RETRY CONNECT {i+1}")
 
     logging.info(f"# run_create_script connected \n")
-    run_command(client, "sudo apt-get update")
-    run_command(client, "sudo apt-get install -y docker.io")
-    run_command(client, "sudo apt-get install -y git")
-    run_command(client, "sudo apt-get install docker-compose -y")
-    run_command(client, f"mkdir {project_name}")
-    run_command(client, f"cd {project_name} ; git clone {git}")
-    run_command(client, f'cd {project_name}/{git_dir}/{path} ; sudo sed -i "s/dummy_password/{password}/g" docker-compose.yml')
-    run_command(client, f"cd {project_name}/{git_dir}/{path} ; sudo docker-compose build")
-    run_command(client, f"cd {project_name}/{git_dir}/{path} ; sudo docker-compose up -d")
+    run_command_on_instance(client, "sudo apt-get update")
+    run_command_on_instance(client, "sudo apt-get install -y docker.io")
+    run_command_on_instance(client, "sudo apt-get install -y git")
+    run_command_on_instance(client, "sudo apt-get install docker-compose -y")
+    run_command_on_instance(client, f"mkdir {project_name}")
+    run_command_on_instance(client, f"cd {project_name} ; git clone {git}")
+    run_command_on_instance(client, f'cd {project_name}/{git_dir}/{path} ; sudo sed -i "s/dummy_password/{password}/g" docker-compose.yml')
+    run_command_on_instance(client, f"cd {project_name}/{git_dir}/{path} ; sudo docker-compose build")
+    run_command_on_instance(client, f"cd {project_name}/{git_dir}/{path} ; sudo docker-compose up -d")
     client.close()
     logging.info(f"# run_create_script end \n")
 
-def run_start_script(ip:str, rsa_key_path:str):
+def start_app(ip:str, rsa_key_path:str):
     logging.info(f"# run_start_script {ip}\n")
 
     rsa_key: paramiko.rsakey.RSAKey = paramiko.rsakey.RSAKey.from_private_key_file(rsa_key_path)
@@ -78,10 +78,10 @@ def run_start_script(ip:str, rsa_key_path:str):
         logging.info(f"RETRY CONNECT {i+1}")
 
     logging.info(f"# run_start_script connected \n")
-    run_command(client, f"cd {project_name}/{git_dir}/{path} ; git checkout HEAD docker-compose.yml")
-    run_command(client, f'cd {project_name}/{git_dir}/{path} ; sed -i "s/dummy_password/{password}/g" docker-compose.yml')
-    run_command(client, f"cd {project_name}/{git_dir}/{path} ; sudo docker-compose build")
-    run_command(client, f"cd {project_name}/{git_dir}/{path} ; sudo docker-compose up -d")
+    run_command_on_instance(client, f"cd {project_name}/{git_dir}/{path} ; git checkout HEAD docker-compose.yml")
+    run_command_on_instance(client, f'cd {project_name}/{git_dir}/{path} ; sed -i "s/dummy_password/{password}/g" docker-compose.yml')
+    run_command_on_instance(client, f"cd {project_name}/{git_dir}/{path} ; sudo docker-compose build")
+    run_command_on_instance(client, f"cd {project_name}/{git_dir}/{path} ; sudo docker-compose up -d")
     client.close()
     logging.info(f"# run_start_script end \n")
 
@@ -92,9 +92,13 @@ if __name__ == "__main__":
         raise err
 
     opts = [("-h")] if len(opts) == 0 else opts
-    ec2_client:ec2.Client = boto3.client("ec2")
-    network:AWSNetwork = AWSNetwork(ec2_client, project_name=project_name, ports=ports, vpc_cidr_block=vpc_cidr_block, subnet_cidr_block=subnet_cidr_block)
-    instance:AWSInstance = AWSInstance(ec2_client, project_name=project_name, instance_type=instance_type, image_id=image_id)
+
+    try:
+        ec2_client:ec2.Client = boto3.client("ec2")
+        network:AWSNetwork = AWSNetwork(ec2_client, project_name=project_name, ports=ports, vpc_cidr_block=vpc_cidr_block, subnet_cidr_block=subnet_cidr_block)
+        instance:AWSInstance = AWSInstance(ec2_client, project_name=project_name, instance_type=instance_type, image_id=image_id)
+    except:
+        logging.info(f"# Require `aws configure` \n")
 
     for o, a in opts:
         if o in ("-c", "--create"):
@@ -114,7 +118,7 @@ if __name__ == "__main__":
             logging.info(f"# INIT INSTANCE\n")
             ip_list = get_ip(ec2_client, project_name)
             if len(ip_list) > 0:
-                run_create_script(ip_list[0],f"{project_name}.pem")
+                create_app(ip_list[0],f"{project_name}.pem")
             else:
                 logging.info(f">> Not Found \n")
         elif o in ("-d", "--delete"):
@@ -129,7 +133,7 @@ if __name__ == "__main__":
             logging.info(f"# INIT INSTANCE\n")
             ip_list = get_ip(ec2_client, project_name)
             if len(ip_list) > 0:
-                run_create_script(ip_list[0],f"{project_name}.pem")
+                create_app(ip_list[0],f"{project_name}.pem")
             else:
                 logging.info(f">> Not Found \n")
         elif o in ("-s","--stop"):
@@ -141,7 +145,7 @@ if __name__ == "__main__":
             instance.wait_instance_is_running()
             ip_list = get_ip(ec2_client, project_name)
             if len(ip_list) > 0:
-                run_start_script(ip_list[0],f"{project_name}.pem")
+                start_app(ip_list[0],f"{project_name}.pem")
             else:
                 logging.info(f">> Not Found \n")
         else:

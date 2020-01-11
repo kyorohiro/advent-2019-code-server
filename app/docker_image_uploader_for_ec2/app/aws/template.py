@@ -2,6 +2,7 @@ from aws.network import AWSNetwork
 from aws.instance import AWSInstance
 from typing import List
 from boto3_type_annotations.ec2 import Client as EC2Client
+
 def create_network(network:AWSNetwork):
     print(">>> Create")
     try:
